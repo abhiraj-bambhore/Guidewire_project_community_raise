@@ -1,0 +1,30 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Abhiraj-ux", email = "abhirajbambhore@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "apscheduler>=3.11.3",
+    "asyncpg>=0.32.0",
+    "fastapi>=0.159.1",
+    "google-generativeai>=0.8.6",
+    "httpx>=0.28.1",
+    "psycopg2-binary>=2.9.13",
+    "pydantic-settings>=2.16.1",
+    "python-dotenv>=1.2.4",
+    "python-multipart>=0.0.32",
+    "sqlalchemy>=2.1.6",
+    "supabase>=2.33.0",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[project.scripts]
+backend = "backend:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
