@@ -16,7 +16,7 @@ RULES = {
     3: "No fund release before first premium is paid",
     4: "Claim payments go only to the holding account",
     5: "Cancelled or lapsed policy forces campaign to Paused",
-    6: "Held + released + refunded equals total invested",
+    6: "Total invested capital must balance with held, released, and refunded funds",
     7: "Investment limits respected and total raised never exceeds target",
     8: "Failed campaigns fully refunded",
 }
@@ -140,7 +140,7 @@ class CheckerService:
     async def _rule1(self, conn, c: dict) -> list[dict]:
         """Confirmed investments == escrow receipts."""
         inv_total = await conn.fetchval(
-            "SELECT COALESCE(SUM(amount),0) FROM investments WHERE campaign_id=$1 AND status='confirmed'",
+            "SELECT COALESCE(SUM(amount),0) FROM investments WHERE campaign_id=$1 AND status IN ('confirmed', 'refunded')",
             c["id"],
         )
         escrow_total = await conn.fetchval(
@@ -148,9 +148,10 @@ class CheckerService:
             c["id"],
         )
         if abs(float(inv_total) - float(escrow_total)) > 0.01:
+            diff = abs(float(inv_total) - float(escrow_total))
             return [self._make_violation(
                 c["id"], 1,
-                f"Investments={inv_total} but Escrow={escrow_total}. Difference={abs(float(inv_total)-float(escrow_total))}",
+                f"Documented investments of ₹{float(inv_total):,.2f} do not match escrow account balance of ₹{float(escrow_total):,.2f} (unaccounted discrepancy: ₹{diff:,.2f}).",
             )]
         return []
 
@@ -225,10 +226,11 @@ class CheckerService:
         released = float(c["total_released"])
         refunded = float(c["total_refunded"])
         if abs((held + released + refunded) - total_inv) > 1.0:
+            total_accounted = held + released + refunded
+            diff = abs(total_accounted - total_inv)
             return [self._make_violation(
                 c["id"], 6,
-                f"Held({held}) + Released({released}) + Refunded({refunded}) = {held+released+refunded}, "
-                f"but Total Invested = {total_inv}. Difference = {abs(held+released+refunded-total_inv)}",
+                f"Ledger reconciliation mismatch: Total accounted funds (held ₹{held:,.2f}, released ₹{released:,.2f}, and refunded ₹{refunded:,.2f} equaling ₹{total_accounted:,.2f}) does not match total invested capital of ₹{total_inv:,.2f} (unbalanced variance: ₹{diff:,.2f}).",
             )]
         return []
 

@@ -1,11 +1,8 @@
 /** Shared utility helpers */
 
 export function formatINR(amount: number | string | null | undefined): string {
-  const n = Number(amount ?? 0)
-  if (n >= 1_00_00_000) return `₹${(n / 1_00_00_000).toFixed(2)} Cr`
-  if (n >= 1_00_000) return `₹${(n / 1_00_000).toFixed(2)} L`
-  if (n >= 1_000) return `₹${(n / 1_000).toFixed(1)}K`
-  return `₹${n.toFixed(0)}`
+  const n = Math.round(Number(amount ?? 0))
+  return `₹${n.toLocaleString('en-IN')}`
 }
 
 export function pct(raised: number, target: number): number {
@@ -35,15 +32,8 @@ export function formatDateShort(iso: string): string {
   })
 }
 
-export function outletIcon(type: string): string {
-  const icons: Record<string, string> = {
-    cafe: '☕',
-    gym: '🏋️',
-    bakery: '🥐',
-    salon: '💇',
-    restaurant: '🍽️',
-  }
-  return icons[type] ?? '🏪'
+export function outletIcon(_type: string): string {
+  return ''
 }
 
 export const COVERAGE = [

@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as api from '../api'
-import { formatINR, outletIcon, stateBadgeClass, pct } from '../utils'
+import { formatINR, stateBadgeClass, pct } from '../utils'
+import { BuildingIcon, OutletIcon, FlameIcon } from '../components/Icons'
 
 const OUTLET_TYPES = ['cafe', 'gym', 'bakery', 'salon', 'restaurant']
 const CITIES = ['Mumbai', 'Delhi', 'Bengaluru', 'Hyderabad', 'Pune', 'Chennai', 'Kolkata', 'Ahmedabad']
@@ -150,7 +151,7 @@ export default function MerchantDashboard() {
           <div className="spinner-wrap"><div className="spinner" /></div>
         ) : campaigns.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">🏪</div>
+            <div className="empty-icon"><BuildingIcon size={36} color="var(--text-muted)" /></div>
             <h3>No campaigns yet</h3>
             <p>Create your first campaign to start raising funds from your community.</p>
             <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setTab('create')}>
@@ -186,7 +187,7 @@ export default function MerchantDashboard() {
               <div className="form-group">
                 <label className="form-label">Outlet Type</label>
                 <select className="form-control" value={form.outlet_type} onChange={e => field('outlet_type', e.target.value)}>
-                  {OUTLET_TYPES.map(t => <option key={t} value={t}>{outletIcon(t)} {t}</option>)}
+                  {OUTLET_TYPES.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
                 </select>
               </div>
               <div className="form-group">
@@ -258,7 +259,7 @@ function MerchantCampaignRow({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <span style={{ fontSize: 22 }}>{outletIcon(c.outlet_type)}</span>
+            <OutletIcon type={c.outlet_type} size={20} />
             <span style={{ fontWeight: 700, fontSize: 16 }}>{c.title}</span>
             <span className={stateBadgeClass(c.state)}>{c.state.replace('_', ' ')}</span>
           </div>
@@ -306,13 +307,13 @@ function MerchantCampaignRow({
               Release T3
             </button>
             <button className="btn btn-danger btn-sm" disabled={busy} onClick={() => onAct(() => api.simulateLoss(c.id, 'fire', 500000), 'Loss simulated')}>
-              🔥 Simulate Loss
+              <FlameIcon size={14} /> Simulate Fire Loss
             </button>
           </>
         )}
-        {['funded', 'active'].includes(c.state) && (
+        {['funded', 'under_claim'].includes(c.state) && (
           <button className="btn btn-danger btn-sm" disabled={busy} onClick={() => onAct(() => api.simulateLoss(c.id, 'fire', 500000), 'Loss simulated')}>
-            🔥 Simulate Loss
+            <FlameIcon size={14} /> Simulate Loss
           </button>
         )}
         {c.state === 'live' && (

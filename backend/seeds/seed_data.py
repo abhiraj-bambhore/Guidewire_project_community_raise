@@ -125,11 +125,14 @@ async def seed():
     print("Connected to database.")
 
     # Check if data already exists
-    existing = await conn.fetchval("SELECT COUNT(*) FROM merchants")
+    existing = await conn.fetchval("SELECT COUNT(*) FROM campaigns")
     if existing > 0:
-        print(f"Database already has {existing} merchants. Skipping seed.")
+        print(f"Database already has {existing} campaigns. Skipping seed.")
         await conn.close()
         return
+
+    # Clean partial seed if any
+    await conn.execute("TRUNCATE merchants, investors CASCADE")
 
     # ── Merchants ──
     merchant_ids = []

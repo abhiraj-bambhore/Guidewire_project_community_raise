@@ -11,7 +11,7 @@ from app.config import get_settings
 from app.database import init_pool, close_pool
 from app.ai.gemini_client import GeminiClient
 from app.services.checker_service import CheckerService
-from app.routers import campaigns, investments, guidewire, checker, audit, merchants, predictions
+from app.routers import campaigns, investments, guidewire, checker, audit, merchants, predictions, drafting
 
 _scheduler = AsyncIOScheduler()
 
@@ -65,6 +65,7 @@ app.include_router(checker.router)
 app.include_router(audit.router)
 app.include_router(merchants.router)
 app.include_router(predictions.router)
+app.include_router(drafting.router)
 
 
 @app.get("/health")

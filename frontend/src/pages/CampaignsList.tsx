@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as api from '../api'
-import { formatINR, pct, outletIcon, stateBadgeClass, formatDateShort } from '../utils'
+import { formatINR, pct, stateBadgeClass, formatDateShort } from '../utils'
+import { OutletIcon, ShieldCheckIcon, BuildingIcon } from '../components/Icons'
 
 const STATES = ['all', 'draft', 'underwriting', 'live', 'funded', 'active', 'under_claim', 'failed', 'paused', 'declined']
 
@@ -24,11 +25,32 @@ export default function CampaignsList() {
 
   return (
     <div className="page">
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 className="page-title">Community Campaigns</h1>
-          <p className="page-subtitle">Fund local businesses and watch your community grow.</p>
+          <p className="page-subtitle">Fund verified local businesses backed by Guidewire-style insurance protection.</p>
         </div>
+        <button
+          onClick={() => navigate('/drafting')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: '#eff6ff',
+            border: '1.5px solid #bfdbfe',
+            color: '#0055b8',
+            padding: '9px 16px',
+            borderRadius: '8px',
+            fontWeight: 700,
+            fontSize: '13.5px',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          <span>🔍</span>
+          <span>Drafting Layer & MiroFish Trends</span>
+          <span style={{ fontSize: '11px', background: '#0055b8', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>NEW</span>
+        </button>
       </div>
 
       <div className="filter-bar">
@@ -49,7 +71,7 @@ export default function CampaignsList() {
         <div className="spinner-wrap"><div className="spinner" /></div>
       ) : campaigns.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon">🏪</div>
+          <div className="empty-icon"><BuildingIcon size={36} color="var(--text-muted)" /></div>
           <h3>No campaigns found</h3>
           <p>Try changing the filter or create one from the Merchant dashboard.</p>
         </div>
@@ -69,14 +91,18 @@ function CampaignCard({ campaign: c, onClick }: { campaign: api.Campaign; onClic
   return (
     <div className="card campaign-card card-body" onClick={onClick}>
       <div className="campaign-card-header">
-        <span style={{ fontSize: 28 }}>{outletIcon(c.outlet_type)}</span>
+        <div className="outlet-icon-badge">
+          <OutletIcon type={c.outlet_type} size={22} />
+        </div>
         <span className={stateBadgeClass(c.state)}>{c.state.replace('_', ' ')}</span>
       </div>
 
       <div className="campaign-tags">
         <span className="badge badge-neutral">{c.outlet_type}</span>
         <span className="badge badge-neutral">{c.city}</span>
-        <span className="badge badge-insured">✓ Insured</span>
+        <span className="badge badge-insured">
+          <ShieldCheckIcon size={12} color="#166534" /> Guidewire Insured
+        </span>
       </div>
 
       <div className="card-title">{c.title}</div>

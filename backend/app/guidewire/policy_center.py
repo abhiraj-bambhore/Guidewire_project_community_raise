@@ -29,12 +29,64 @@ BASE_RATES: dict[str, float] = {
 
 SUPPORTED_TYPES = set(BASE_RATES.keys())
 
+OUTLET_COVERAGES = {
+    "bakery": [
+        "Commercial Hearth & Deck Oven Breakdown",
+        "Raw Material & Cold Storage Spoilage",
+        "Combustible Dust & Fire Special Perils",
+        "Business Interruption (Supply Chain Halts)",
+        "Food Product Contamination & Customer Liability",
+    ],
+    "cafe": [
+        "Espresso Steam Boiler & Grinder Breakdown",
+        "Walk-In Milk & Beverage Perishable Spoilage",
+        "Roasting Exhaust & Fire Special Perils",
+        "Customer Slip & Fall Public Liability",
+        "Business Interruption (Footfall Halts)",
+    ],
+    "gym": [
+        "High-Intensity Athletic Rig & Motor Breakdown",
+        "Member Traumatic Injury & Premises Liability",
+        "Locker Room Pipe Burst & Water Ingress Peril",
+        "Business Interruption (Membership Continuity)",
+        "Professional Fitness Trainer Indemnity",
+    ],
+    "salon": [
+        "Cosmetic Chemical Treatment & Scalp Liability",
+        "Hydraulic Chairs & Laser Equipment Breakdown",
+        "Electrical Surge & Special Fire Perils",
+        "Water Supply Interruption Endorsement",
+        "Business Interruption (Appointment Book Loss)",
+    ],
+    "restaurant": [
+        "Commercial Grease Hood & Flue Fire Perils",
+        "Walk-In Deep Freezer Spoilage Protection",
+        "Foodborne Pathogen & Beverage Contamination",
+        "Heavy Duty Range & HVAC Breakdown",
+        "Dining Floor Public Bodily Injury Liability",
+        "Peak-Hours Business Interruption Compensation",
+    ],
+}
+
 DEFAULT_COVERAGE = [
     "Fire and Special Perils",
     "Business Interruption",
     "Equipment Breakdown",
     "Public Liability",
 ]
+
+def get_custom_coverages(outlet_type: str, has_fire_safety_cert: bool = True, area_sqft: float = 0, insured_amount: float = 0) -> list[str]:
+    ot = (outlet_type or "").lower().strip()
+    covs = list(OUTLET_COVERAGES.get(ot, DEFAULT_COVERAGE))
+    if has_fire_safety_cert:
+        covs.append("Certified Municipal Fire Safety Warranty Credit")
+    else:
+        covs.append("Non-Certified Peril Surcharge Condition")
+    if area_sqft > 2000:
+        covs.append("Large Footprint Commercial Umbrella Floater")
+    if insured_amount > 2_500_000:
+        covs.append("High-Value Capital Asset Restoration Endorsement")
+    return covs
 
 MANUAL_REVIEW_THRESHOLD = 2_500_000   # 25 lakh in rupees
 
@@ -111,7 +163,7 @@ class PolicyCenter:
             "premium": round(premium, 2),
             "base_rate": rate,
             "decision": decision,
-            "coverage": DEFAULT_COVERAGE,
+            "coverage": get_custom_coverages(outlet_type, has_fire_safety_cert, area_sqft, insured_amount),
             "notes": notes,
             "ai_explanation": ai_text,
         }

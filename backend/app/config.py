@@ -8,10 +8,12 @@ class Settings(BaseSettings):
     supabase_service_role_key: str = ""
     database_url: str = ""
 
-    gemini_api_key: str = ""
-    gemini_model: str = "gemini-2.0-flash"
+    groq_api_key: str = ""
+    groq_model: str = "openai/gpt-oss-120b"
 
-    # MiroFish local sidecar — blank = always use Gemini fallback
+    
+
+    # MiroFish local sidecar — blank = always use Groq/Mirofish fallback
     # Set to http://localhost:5001 once you've started the mirofish/backend server.
     mirofish_local_url: str = ""
 
