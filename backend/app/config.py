@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     def cors_origins(self) -> list[str]:
         return [o.strip() for o in self.backend_cors_origins.split(",")]
 
-    model_config = {"env_file": "../.env", "extra": "ignore"}
+    model_config = {"env_file": (".env", "../.env"), "extra": "ignore"}
 
 
 @lru_cache

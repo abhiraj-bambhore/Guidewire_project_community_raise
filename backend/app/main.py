@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.database import init_pool, close_pool
-from app.ai.gemini_client import GeminiClient
+from app.ai.groq_client import GroqClient
 from app.services.checker_service import CheckerService
 from app.routers import campaigns, investments, guidewire, checker, audit, merchants, predictions, drafting
 
@@ -20,8 +20,8 @@ _scheduler = AsyncIOScheduler()
 async def lifespan(app: FastAPI):
     await init_pool()
 
-    gemini = GeminiClient()
-    checker_svc = CheckerService(gemini)
+    ai_client = GroqClient()
+    checker_svc = CheckerService(ai_client)
 
     async def _scheduled_scan():
         try:

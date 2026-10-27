@@ -197,22 +197,22 @@ The **Customer Drafting Layer** allows potential backers to evaluate pre-launch 
 sequenceDiagram
     autonumber
     actor Customer as Potential Investor
-    participant UI as Drafting Layer UI (/drafting)
+    participant UI as Drafting Layer UI
     participant Back as Drafting API Router
     participant PC as Guidewire PolicyCenter
     participant MF as MiroFish Swarm Engine
 
     Customer->>UI: Visits Customer Drafting Layer
     UI->>Back: GET /api/drafting
-    Back->>PC: Query preliminary quote & customized peril package
-    PC-->>Back: Returns {base_rate, premium, decision, coverage[]}
-    Back->>MF: Pull 14-day agent swarm telemetry & consensus
-    MF-->>Back: Returns {investment_intent, risk_perception, cohorts[]}
+    Back->>PC: Query preliminary quote and customized peril package
+    PC-->>Back: Returns quote, premium, decision, and coverage details
+    Back->>MF: Pull 14-day agent swarm telemetry and consensus
+    MF-->>Back: Returns investment intent, risk perception, cohorts
     Back-->>UI: Complete Drafting Snapshot Payload
-    UI-->>Customer: Renders interactive SVG trends & campaign cards
+    UI-->>Customer: Renders interactive SVG trends and campaign cards
     Customer->>UI: Clicks "Signal Priority Backer Interest"
     UI->>Back: Register early commitment intent in swarm ledger
-    Back->>MF: Agent Pulse-β updates investor intent velocity (+1.2%)
+    Back->>MF: Agent Pulse-Beta updates investor intent velocity
     Back-->>UI: 200 OK (Priority backer badge queued)
     UI-->>Customer: Shows success confirmation banner
 ```
@@ -228,19 +228,19 @@ sequenceDiagram
     autonumber
     actor Merchant as Outlet Owner
     participant CC as Guidewire ClaimCenter
-    participant PC as PolicyCenter
+    participant PC as Guidewire PolicyCenter
     participant ESC as Safe Holding Escrow Pool
     participant CHK as Continuous Safety Checker
     actor Backer as Community Backers
 
-    Merchant->>CC: File FNOL (First Notice of Loss: e.g. Kitchen Fire ₹12,00,000)
+    Merchant->>CC: File FNOL (First Notice of Loss: Kitchen Fire Rs 12 Lakh)
     CC->>PC: Verify active in_force commercial peril coverage
-    PC-->>CC: Policy verified (Fire & Perils endorsed)
-    CC->>CC: AI triage calculates net indemnity & holds reserve
-    CC->>ESC: Dispatches settlement payment of ₹12,00,000 to ESCROW
+    PC-->>CC: Policy verified (Fire and Perils endorsed)
+    CC->>CC: AI triage calculates net indemnity and holds reserve
+    CC->>ESC: Dispatches settlement payment of Rs 12 Lakh to Escrow
     Note over CC,ESC: Rule 4: Indemnity MUST credit named escrow, not merchant personal account
-    CHK->>CHK: Runs Rule 4 & Rule 1 invariant check (PASS)
-    ESC-->>Backer: Pro-rata investor equity / loss protected; capital intact!
+    CHK->>CHK: Runs Rule 4 and Rule 1 invariant check (PASS)
+    ESC-->>Backer: Pro-rata investor equity and loss protected - capital intact
 ```
 
 ---
@@ -272,7 +272,7 @@ The platform models Guidewire's industry-standard property & casualty insurance 
 #### Actuarial Premium Determination
 Premium is calculated dynamically based on merchant risk exposure:
 
-$$\text{Annual Premium} = \text{Insured Amount} \times \text{Base Rate} \times \text{Safety Factor} \times \text{Footprint Factor}$$
+`Annual Premium = Insured Amount × Base Rate × Safety Factor × Footprint Factor`
 
 | Outlet Type | Base Premium Rate (% p.a.) | Risk Profile |
 |:---|:---:|:---|
@@ -413,20 +413,20 @@ The **Drafting Layer** (`/drafting`) provides prospective investors with a dedic
 
 ---
 
-## 🛡️ The Continuous Safety Checker (8 System Invariants)
+## 🛡️ The Continuous Safety Checker (8 System Rules)
 
-An autonomous background worker runs every few seconds to verify **8 mathematical invariants** across the entire database ledger:
+An automated background auditor runs every few seconds to verify **8 safety rules** across all database records. If any rule is broken, the audit page immediately flags the discrepancy in red.
 
-| Invariant | Plain Meaning & Mathematical Constraint |
-|:---:|:---|
-| **Rule 1** | $\sum \text{Confirmed Investments} \equiv \text{Escrow Ledger Balance}$ (No missing or phantom funds) |
-| **Rule 2** | $\text{Campaign} \in \{\text{Funded}, \text{Active}\} \implies \text{Policy Status} = \text{"in\_force"}$ |
-| **Rule 3** | $\text{Tranche Disbursed} > 0 \implies \text{BillingCenter Premium Invoice} = \text{"paid"}$ |
-| **Rule 4** | $\text{Claim Payment Recipient} \equiv \text{Safe Holding Escrow Account}$ (Never merchant personal accounts) |
-| **Rule 5** | $\text{Policy Status} \in \{\text{"cancelled"}, \text{"lapsed"}\} \implies \text{Campaign State} = \text{"paused"}$ |
-| **Rule 6** | $\text{Money Held} + \text{Money Released} + \text{Money Refunded} \equiv \text{Total Invested}$ |
-| **Rule 7** | $\forall i: \text{Investment}_i \le \text{Max Allowed} \land \text{Total Raised} \le \text{Target Cap}$ |
-| **Rule 8** | $\text{Campaign State} = \text{"failed"} \implies \text{Money Refunded} \equiv \text{Total Invested}$ |
+| Rule | Rule Name | Plain English Meaning | What is Checked |
+|:---:|:---|:---|:---|
+| **Rule 1** | Escrow Balance Match | The total of all confirmed investments must exactly match the money held in the safe escrow account. | Confirmed Investments = Escrow Balance |
+| **Rule 2** | Active Policy Required | A campaign that is Funded or Active must have an official insurance policy that is in force. | Campaign in Funded/Active → Policy is In Force |
+| **Rule 3** | Premium Paid Before Release | No money is released to the merchant until the first insurance premium invoice is paid. | Tranche Released > 0 → Premium Invoice Paid |
+| **Rule 4** | Claims Go to Escrow | Every insurance claim payout must go to the safe holding escrow account to protect backers, never directly to the merchant. | Claim Recipient = Safe Holding Escrow |
+| **Rule 5** | Auto-Pause on Cancelled Policy | If an insurance policy is cancelled or lapses, the campaign is automatically paused until it is resolved. | Policy Cancelled/Lapsed → Campaign Paused |
+| **Rule 6** | Conservation of Funds | Money held in escrow + money released to the merchant + money refunded must equal the total amount invested. | Money Held + Released + Refunded = Total Raised |
+| **Rule 7** | No Overfunding or Limit Breaches | No single investor can exceed the maximum investment limit, and a campaign can never collect more than its target goal. | Pledges ≤ Max Limit & Total Raised ≤ Target |
+| **Rule 8** | Full Refund on Failed Campaigns | If a campaign does not reach its funding target by the deadline, 100% of all invested money is refunded to backers. | Failed Campaign → 100% Capital Refunded |
 
 *Demo Feature*: Use the **"Inject Fault"** button on the `/audit` page to purposely trigger a violation (e.g. escrow balance tampering) and watch the Safety Checker catch and highlight it in red, then click **"Fix Faults"** to restore green integrity.
 
@@ -444,7 +444,6 @@ guideware_project/
 │   │   ├── guidewire/
 │   │   │   └── policy_center.py        # Guidewire PolicyCenter practice engine
 │   │   ├── ai/
-│   │   │   ├── gemini_client.py        # Gemini AI client for underwriting explanations
 │   │   │   └── groq_client.py          # Groq AI for fast neural inference
 │   │   ├── services/
 │   │   │   ├── campaign_service.py     # Campaign CRUD, state transitions, escrow
@@ -497,10 +496,9 @@ Copy `.env.example` to `.env` in the root directory:
 ```bash
 cp .env.example .env
 ```
-Ensure your database connection string and optional AI keys (Gemini / Groq) are configured:
+Ensure your database connection string and Groq API key are configured:
 ```ini
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/community_raise
-GEMINI_API_KEY=your_key_here
 GROQ_API_KEY=your_key_here
 ```
 
